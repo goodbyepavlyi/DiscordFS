@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  discordfs:
+    container_name: discordfs
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./data:/app/data"
+    restart: unless-stopped
