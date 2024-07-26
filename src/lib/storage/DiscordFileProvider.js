@@ -1,6 +1,7 @@
 const { MutableBuffer } = require("mutable-buffer");
 const { Writable } = require("stream");
 const { AttachmentBuilder } = require("discord.js");
+const crypto = require("crypto");
 const Logger = require("../Logger");
 const BaseProvider = require("./BaseProvider");
 const HttpStreamPool = require("../utils/HttpStreamPool");
