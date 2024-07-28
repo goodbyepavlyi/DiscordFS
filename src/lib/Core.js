@@ -15,9 +15,7 @@ class Core extends Client {
                 IntentsBitField.Flags.Guilds, 
                 IntentsBitField.Flags.GuildMessages
             ],
-            rest: {
-                timeout: 60_000
-            }
+            rest: { timeout: 60_000 }
         });
 
         this.on("warn", (info) => Logger.warn(Logger.Type.Discord, info));
@@ -189,7 +187,7 @@ class Core extends Client {
         if (messages.length == 0) {
             Logger.info(Logger.Type.Discord, "No metadata message found, creating one...");
 
-            const db = Config.shouldEncrypt ? await this._encryptDatabase({}) : Buffer.from("{}");
+            const db = Config.encryptionEnabled ? await this._encryptDatabase({}) : Buffer.from("{}");
             message = await this.metaChannel.send({
                 files: [{
                     attachment: db,
@@ -218,7 +216,7 @@ class Core extends Client {
         const response = await fetch(attachment.url);
         try {
             const data = await response.text();
-            const database = JSON.parse(Config.shouldEncrypt ? this._decryptDatabase(data) : data);
+            const database = JSON.parse(Config.encryptionEnabled ? this._decryptDatabase(data) : data);
 
             this.fs = VolumeEx.fromJSON(database);
             this.metadataMessage = message;
@@ -252,7 +250,7 @@ class Core extends Client {
 
         const json = this.fs.toJSON();
         const file = JSON.stringify(json);
-        const buffer = Config.shouldEncrypt ? await this._encryptDatabase(json) : Buffer.from(file);
+        const buffer = Config.encryptionEnabled ? await this._encryptDatabase(json) : Buffer.from(file);
 
         // TODO: Save databases into more messages if it's too big
         await this.metadataMessage.edit({

@@ -29,7 +29,7 @@ class DiscordFileProvider extends BaseProvider {
      */
     getAttachmentBuilderFromBuffer(buffer, chunkName, chunkNumber = 0) {
         let name = `${chunkName}_${chunkNumber}`;
-        if (Config.shouldEncrypt) {
+        if (Config.encryptionEnabled) {
             name = `${crypto.randomBytes(16).toString("hex")}.enc`;
         }
 

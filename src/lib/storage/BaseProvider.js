@@ -131,7 +131,7 @@ module.exports = class BaseProvider {
      * @returns {Promise<Readable>} 
      */
     async createReadStream(file) {
-        if (Config.shouldEncrypt) {
+        if (Config.encryptionEnabled) {
             return await this.createReadStreamWithDecryption(file);
         }
      
@@ -144,7 +144,7 @@ module.exports = class BaseProvider {
      * @returns {Promise<Writable>}
      */
     async createWriteStream(file, callbacks) {
-        if (Config.shouldEncrypt) {
+        if (Config.encryptionEnabled) {
             return await this.createWriteStreamWithEncryption(file, callbacks);
         }
      
