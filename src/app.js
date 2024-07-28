@@ -1,20 +1,14 @@
 const Logger = require("./lib/Logger");
-const Core = require("./lib/Core");
-
-process.on("unhandledRejection", (reason, promise) => {
-    Logger.error(Logger.Type.Watchdog, "Unhandled Rejection", {
-        stack: reason?.stack,
-    });
-});
+const core = require("./lib/Core");
 
 async function shutdown() {
     try {
-        await Core.shutdown();
+        await core.shutdown();
 
         // Need to exit here because otherwise the process would stay open
         process.exit(0);
     } catch (error) {
-        Logger.error(Logger.Type.Watchdog, `Error occured:`, error);
+        Logger.error(Logger.Type.Watchdog, "An &cunknown error&r occured while &cshutting down&r, error:", error);
         process.exit(1);
     }
 }
@@ -26,16 +20,10 @@ process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
 process.on("uncaughtException", (error, origin) => {
-    Logger.error(Logger.Type.Watchdog, "Uncaught Exception", { error, origin });
+    Logger.error(Logger.Type.Watchdog, "An &cuncaught exception&r occured, error:", error);
 
     shutdown().catch(() => { /* intentional */ });
 });
 
-process.on("exit", (code) => {
-    if (code !== 0) {
-        Logger.error(Logger.Type.Watchdog, `Stacktrace that lead to the process exiting with code ${code}:`, new Error().stack);
-        return;
-    }
-   
-    Logger.info(Logger.Type.Watchdog, `Exiting with code ${code}...`);
-});
+process.on("unhandledRejection", (reason, promise) => Logger.error(Logger.Type.Watchdog, "An &cunhandled promise rejection&r occured, error:", reason?.stack));
+process.on("exit", (code) => Logger.info(Logger.Type.Watchdog, `&cExiting&r with &ccode ${code}&r...`));
