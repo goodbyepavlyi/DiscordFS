@@ -228,10 +228,7 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         for (const chunk of file.chunks) {
             Logger.debug(Logger.Type.Filesystem, `&c_openWriteStream&r: Deleting chunk &c${chunk.id}&r for file &c${file.name}&r...`);
 
-            this.provider.addToDeletionQueue({
-                channel: this.core.filesChannel.id,
-                message: chunk.id
-            });
+            this.provider.addToDeletionQueue(this.core._filesChannel.id, chunk.id);
         }
 
         file.chunks = [];
@@ -284,10 +281,7 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
             for (const chunk of this.fs.getFile(fileToDelete).chunks) {
                 Logger.debug(Logger.Type.Filesystem, `&c_delete&r: Deleting chunk &c${chunk.id}&r for file &c${fileToDelete}&r...`);
 
-                this.provider.addToDeletionQueue({
-                    channel: this.core.filesChannel.id,
-                    message: chunk.id
-                });
+                this.provider.addToDeletionQueue(this.core._filesChannel.id, chunk.id);
             }
         }
 

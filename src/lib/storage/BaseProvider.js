@@ -2,13 +2,6 @@ const crypto = require("crypto");
 const { Writable, Readable } = require("stream");
 const Logger = require("../Logger");
 const Config = require("../Config");
-const Encryption = require("../utils/Encryption");
-
-/**
- * @typedef {object} IDelayedDeletionEntry
- * @property {string} channel
- * @property {string} message
- */
 
 module.exports = class BaseProvider {
     /**
@@ -17,16 +10,18 @@ module.exports = class BaseProvider {
     constructor(core) {
         this.core = core;
 
-        /**
-         * @type {Array<IDelayedDeletionEntry>}
-         */
+        /** @type {{ channelId: import("discord.js").Snowflake, messageId: import("discord.js").Snowflake }[]} */
         this.fileDeletionQueue = [];
     }
 
     /**
-     * @param {IDelayedDeletionEntry} info 
+     * @param {import("discord.js").Snowflake} channelId
+     * @param {import("discord.js").Snowflake} messageId
      */
-    addToDeletionQueue = (info) => this.fileDeletionQueue.push(info);
+    addToDeletionQueue(channelId, messageId) {
+        if (!channelId || !messageId) throw new Error("channelId and messageId are required");
+        this.fileDeletionQueue.push({ channelId, messageId });
+    }
     
     /**
      * @private

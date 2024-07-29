@@ -136,26 +136,22 @@ class DiscordFileProvider extends BaseProvider {
      * @returns {Promise<void>}
      */
     async processDeletionQueue() {
-        if (this.fileDeletionQueue.length <= 0) {
-            return;
-        }
+        if (this.fileDeletionQueue.length <= 0) return;
 
-        const info = this.fileDeletionQueue.shift();
-        const channel = this.core.channels.cache.get(info.channel);
-        
+        const file = this.fileDeletionQueue.shift();
+        const channel = this.core.channels.cache.get(file.channelId);
         if (!channel) {
-            Logger.error(Logger.Type.FileProvider, `Failed to find channel &c${info.channel}&r`);
-            return;
+            Logger.error(Logger.Type.FileProvider, `Failed to find channel &c${file.channelId}&r`);
+            throw new Error(`Can't delete file from channel ${file.channelId} - channel not found!`);
         }
 
-        Logger.debug(Logger.Type.FileProvider, `Deleting message &c${info.message}&r from channel &c${info.channel}&r`);
-        await channel.messages.delete(info.message)
+        Logger.debug(Logger.Type.FileProvider, `Deleting message &c${file.messageId}&r from channel &c${file.channelId}&r`);
+        await channel.messages.delete(file.messageId)
             .catch(error => {
-                if (error.code == "10008") {
-                    return Logger.warn(Logger.Type.FileProvider, `Failed to delete message &c${info.message}&r from channel &c${info.channel}&r - Message not found.`);
-                }
-
-                Logger.error(Logger.Type.FileProvider, `Failed to delete message &c${info.message}&r from channel &c${info.channel}&r`, error);
+                if (error.code == "10008") return;
+                
+                Logger.error(Logger.Type.FileProvider, `Failed to delete message &c${file.messageId}&r from channel &c${file.channelId}&r`, error);
+                throw error;
             });
     }
 }
