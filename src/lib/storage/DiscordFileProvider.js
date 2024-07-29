@@ -22,9 +22,6 @@ class DiscordFileProvider extends BaseProvider {
      * @param {Buffer} buffer 
      * @param {string} chunkName 
      * @param {number} chunkNumber 
-     * @param {boolean} addExtension 
-     * @param {boolean} encrypt 
-     * @param {string} extension 
      * @returns {AttachmentBuilder}
      */
     getAttachmentBuilderFromBuffer(buffer, chunkName, chunkNumber = 0) {

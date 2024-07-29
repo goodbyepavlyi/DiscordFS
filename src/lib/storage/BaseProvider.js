@@ -28,8 +28,9 @@ module.exports = class BaseProvider {
      * @param {boolean} autoDestroy 
      */
     createEncryptor(autoDestroy = true) {
+        // TODO: use modern encryption algorithm
         // This is probably bad idea, but I don't know how to fix it.
-        const cipher = crypto.createCipher("chacha20-poly1305", Config.encryptionKey+Config.encryptionIV, { autoDestroy, authTagLength: 16 });
+        const cipher = crypto.createCipher("chacha20-poly1305", Config.encryptionKey + Config.encryptionIV, { autoDestroy, authTagLength: 16 });
         cipher.once("error", (error) => Logger.error(Logger.Type.FileProvider, "An error occurred while encrypting file", error));
 
         return cipher;
