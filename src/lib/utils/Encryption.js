@@ -3,13 +3,25 @@ const Config = require("../Config");
 
 module.exports = class Encryption {
     static _encryptionMethod = "aes-256-cbc";
-    /** @private */
+    /**
+     * @private
+     * @type {string}
+     */
     static _key = null;
-    /** @private */
+    /**
+     * @private
+     * @type {string}
+     */
     static _iv = null;
-    /** @private */
+    /**
+     * @private
+     * @type {crypto.Cipher}
+     */
     static _cipher = null;
-    /** @private */
+    /**
+     * @private
+     * @type {crypto.Decipher}
+     */
     static _decipher = null;
 
     static get key() {
