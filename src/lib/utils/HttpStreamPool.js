@@ -8,13 +8,13 @@ const axiosClient = require("./AxiosInstance");
 
 module.exports = class HttpStreamPool {
     /**
-     * @param {import("../file/IFile").IChunkInfo[]} info 
+     * @param {import("../DocTypes").IChunkInfo[]} info 
      * @param {number} totalSize 
      * @param {string} filename 
      */
     constructor(info, totalSize, filename) {
         /**
-         * @type {import("../file/IFile").IChunkInfo[]}
+         * @type {import("../DocTypes").IChunkInfo[]}
          */
         this.urls = info;
 

@@ -81,7 +81,7 @@ module.exports = class BaseProvider {
     }
 
     /**
-     * @param {import("./IFile").IFile} file 
+     * @param {import("../DocTypes").IFile} file 
      * @param {IWriteStreamCallbacks} callbacks 
      * @returns {Promise<Writable>}
      */
@@ -154,7 +154,7 @@ module.exports = class BaseProvider {
     /**
      * @param {string} name 
      * @param {number} size 
-     * @returns {import("./IFile").IFile}
+     * @returns {import("../DocTypes").IFile}
      */
     createVFile = (name, size) => ({
         name,
@@ -185,7 +185,7 @@ module.exports = class BaseProvider {
     /**
      * Method that should provide raw write stream for uploading files to provider. Only basic write stream to provider, no encryption or anything else.
      * @abstract
-     * @param {import("./IFile").IFile} file - File which should be uploaded.
+     * @param {import("../DocTypes").IFile} file - File which should be uploaded.
      * @param {IWriteStreamCallbacks} callbacks  - Callbacks for write stream.
      */
     async createRawWriteStream(file, callbacks) {

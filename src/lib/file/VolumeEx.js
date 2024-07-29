@@ -14,7 +14,7 @@ module.exports = class VolumeEx extends Volume {
 
     /**
      * @param {string} path 
-     * @returns {import("./IFile").IFile}
+     * @returns {import("../DocTypes").IFile}
      */
     getFile = (path) => JSON.parse(this.readFileSync(path).toString(), (k, v) => {
         if (k === "created" || k === "modified") {
@@ -52,13 +52,13 @@ module.exports = class VolumeEx extends Volume {
 
     /**
      * @param {string} path 
-     * @returns {import("./IFile").IFile[]}
+     * @returns {import("../DocTypes").IFile[]}
      */
     getFilesRecursive = (path) => this.getFilesPathsRecursive(path).map(p => this.getFile(p));
 
     /**
      * @param {string} path 
-     * @returns {Record<string, import("./IFile").IFile>}
+     * @returns {Record<string, import("../DocTypes").IFile>}
      */
     getFilesWithPathRecursive = (path) => this.getFilesPathsRecursive(path).reduce((acc, path) => {
         acc[path] = this.getFile(path);

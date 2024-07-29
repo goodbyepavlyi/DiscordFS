@@ -22,5 +22,5 @@
 module.exports = {
     IFile,
     IChunkInfo,
-    IFilesDesc
+    IFilesDesc,
 };

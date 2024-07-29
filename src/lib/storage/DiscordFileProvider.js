@@ -43,7 +43,7 @@ class DiscordFileProvider extends BaseProvider {
      * @param {number} chunkNumber Chunk number (starts at 1)
      * @param {number} totalChunks Total chunks, used only for logging, looks like is broken anyway at the moment
      * @param {import("discord.js").TextBasedChannel} filesChannel Channel to upload the chunk to
-     * @param {import("../file/IFile").IFile} file File that the chunk belongs to and will be added to after upload. 
+     * @param {import("../DocTypes").IFile} file File that the chunk belongs to and will be added to after upload. 
      */
     async uploadChunkToDiscord(chunk, chunkNumber, totalChunks, filesChannel, file) {
         Logger.info(Logger.Type.FileProvider, `Uploading chunk &c${chunkNumber}&r of &c${totalChunks}&r chunks from file &c${file.name}&r to &cDiscord&r...`);
@@ -77,7 +77,7 @@ class DiscordFileProvider extends BaseProvider {
     }
 
     /**
-     * @param {import("./IFile").IFile} file 
+     * @param {import("../DocTypes").IFile} file 
      * @param {IWriteStreamCallbacks} callbacks 
      * @returns {Promise<Writable>}
      */
