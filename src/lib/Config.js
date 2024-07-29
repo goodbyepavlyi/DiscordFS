@@ -113,7 +113,7 @@ class Config {
     static get saveTimeout() { return this.getConfig().saveTimeout; }
     static get saveToDisk() { return this.getConfig().saveToDisk; }
 
-    static get encryptionEnabled() { return this.encryptionKey && this.encryptionIV; }
+    static get encryptionEnabled() { return this.getConfig().encryption.enabled && this.encryptionKey && this.encryptionIV; }
     static get encryptionKey() { return this.getConfig().encryption.key; }
     static get encryptionIV() { return this.getConfig().encryption.iv; }
 }
