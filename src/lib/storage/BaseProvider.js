@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { Writable, Readable, Transform } = require("stream");
+const { Writable, Readable } = require("stream");
 const Logger = require("../Logger");
 const Config = require("../Config");
 const Encryption = require("../utils/Encryption");
@@ -21,8 +21,6 @@ module.exports = class BaseProvider {
          * @type {Array<IDelayedDeletionEntry>}
          */
         this.fileDeletionQueue = [];
-
-        this.aesKey = Config.encryptPassword ? crypto.createHash('md5').update(Config.encryptPassword, "utf8").digest("hex").slice(0, 32) : null;
     }
 
     /**
@@ -61,7 +59,7 @@ module.exports = class BaseProvider {
 
     /**
      * @private
-     * @param {import("../file/IFile").IFile} file 
+     * @param {import("../DocTypes").IFile} file 
      * @returns {Promise<Readable>}
      */
     async createReadStreamWithDecryption(file) {
@@ -127,28 +125,22 @@ module.exports = class BaseProvider {
      * Main method that should be used to download files from provider.
      * Creates read stream for downloading files from provider. Handles decryption if enabled.
      * Does not handle with any fs operations, only downloads from provider.
-     * @param {import("./IFile").IFile} file 
+     * @param {import("../DocTypes").IFile} file 
      * @returns {Promise<Readable>} 
      */
-    async createReadStream(file) {
-        if (Config.encryptionEnabled) {
-            return await this.createReadStreamWithDecryption(file);
-        }
-     
-        return await this.createRawReadStream(file);
+    createReadStream(file) {
+        if (Config.encryptionEnabled) return this.createReadStreamWithDecryption(file);
+        return this.createRawReadStream(file);
     }
 
     /**
-     * @param {import("./IFile").IFile} file 
+     * @param {import("../DocTypes").IFile} file 
      * @param {IWriteStreamCallbacks} callbacks 
      * @returns {Promise<Writable>}
      */
-    async createWriteStream(file, callbacks) {
-        if (Config.encryptionEnabled) {
-            return await this.createWriteStreamWithEncryption(file, callbacks);
-        }
-     
-        return await this.createRawWriteStream(file, callbacks);
+    createWriteStream(file, callbacks) {
+        if (Config.encryptionEnabled) return this.createWriteStreamWithEncryption(file, callbacks);
+        return this.createRawWriteStream(file, callbacks);
     }
 
     /**
@@ -163,7 +155,6 @@ module.exports = class BaseProvider {
         created: new Date(),
         modified: new Date()
     });
-
     
     /**
      * Method that should be used to implement queue for deleting files from provider. Queue is used to prevent ratelimiting and other blocking issues.
@@ -176,7 +167,7 @@ module.exports = class BaseProvider {
     /**
      * Method that should provide raw read stream for downloading files from provider. Only basic read stream from provider, no decryption or anything else.
      * @abstract
-     * @param {import("./IFile").IFile} file - File which should be downloaded.
+     * @param {import("../DocTypes").IFile} file - File which should be downloaded.
      */
     async createRawReadStream(file) {
         throw new Error("Abstract method not implemented.");
@@ -186,7 +177,7 @@ module.exports = class BaseProvider {
      * Method that should provide raw write stream for uploading files to provider. Only basic write stream to provider, no encryption or anything else.
      * @abstract
      * @param {import("../DocTypes").IFile} file - File which should be uploaded.
-     * @param {IWriteStreamCallbacks} callbacks  - Callbacks for write stream.
+     * @param {IWriteStreamCallbacks} callbacks - Callbacks for write stream.
      */
     async createRawWriteStream(file, callbacks) {
         throw new Error("Abstract method not implemented.");

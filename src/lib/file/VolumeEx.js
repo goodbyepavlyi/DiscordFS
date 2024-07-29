@@ -17,16 +17,12 @@ module.exports = class VolumeEx extends Volume {
      * @returns {import("../DocTypes").IFile}
      */
     getFile = (path) => JSON.parse(this.readFileSync(path).toString(), (k, v) => {
-        if (k === "created" || k === "modified") {
-            return new Date(v);
-        }
-
-        return v;
+        return k === "created" || k === "modified" ? new Date(v) : v;
     });
 
     /**
      * @param {string} path 
-     * @param {import("./IFile").IFile} file 
+     * @param {import("../DocTypes").IFile} file 
      */
     setFile = (path, file) => this.writeFileSync(path, JSON.stringify(file));
 
@@ -35,16 +31,12 @@ module.exports = class VolumeEx extends Volume {
      * @param {string[]} paths 
      */
     getFilesPathsRecursive(initial, paths = []) {
-        const entries = this.readdirSync(initial, { withFileTypes: true });
+        const files = this.readdirSync(initial, { withFileTypes: true });
 
-        for (const entry of entries) {
-            const path = `${initial}/${entry.name}`;
-            
-            if (entry.isDirectory()) {
-                this.getFilesPathsRecursive(path, paths);
-            } else {
-                paths.push(path);
-            }
+        for (const file of files) {
+            const path = `${initial}/${file.name}`;
+            if (file.isDirectory()) this.getFilesPathsRecursive(path, paths);
+            else paths.push(path);
         }
 
         return paths;

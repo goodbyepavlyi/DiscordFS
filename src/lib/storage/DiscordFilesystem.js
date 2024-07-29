@@ -108,10 +108,7 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         });
 
         const stat = this.fs.statSync(path.toString());
-        if (stat.isDirectory()) {
-            return callback(undefined, this.fs.readdirSync(path.toString()));
-        }
-
+        if (stat.isDirectory()) return callback(undefined, this.fs.readdirSync(path.toString()));
         return callback(Errors.ResourceNotFound);
     }
 
@@ -127,16 +124,16 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
 
         const stat = this.fs.statSync(path.toString());
         if (stat.isFile()) {
-            Logger.debug(Logger.Type.Filesystem, `Resource type of &c${path.toString()}&r is &cFile&r.`);
+            Logger.debug(Logger.Type.Filesystem, `&c_type&r: Responding with &cFile&r for path &c${path.toString()}&r`);
             return callback(undefined, ResourceType.File);
         }
         
         if (stat.isDirectory()) {
-            Logger.debug(Logger.Type.Filesystem, `Resource type of &c${path.toString()}&r is &cDirectory&r.`);
+            Logger.debug(Logger.Type.Filesystem, `&c_type&r: Responding with &cDirectory&r for path &c${path.toString()}&r`);
             return callback(undefined, ResourceType.Directory);
         }
 
-        Logger.debug(Logger.Type.Filesystem, `Resource type of &c${path.toString()}&r is &cUnknown&r.`);
+        Logger.debug(Logger.Type.Filesystem, `&c_type&r: Responding with &cNotFound&r for path &c${path.toString()}&r`);
         return callback(Errors.ResourceNotFound);
     }
 
@@ -152,7 +149,7 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
 
         const stat = this.fs.statSync(path.toString());
         if (stat.isFile()) {
-            Logger.debug(Logger.Type.Filesystem, `Mime type of &c${path.toString()}&r is &c${this.getMimeType(path.toString())}&r.`);
+            Logger.debug(Logger.Type.Filesystem, `&c_mimeType&r: Responding with &c${this.getMimeType(path.toString())}&r for path &c${path.toString()}&r`);
             return callback(undefined, this.getMimeType(path.toString()));
         }
 
@@ -171,17 +168,17 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
 
         const exists = this.fs.existsSync(path.toString());
         if (exists) {
-            Logger.debug(Logger.Type.Filesystem, `Resource already exists &c${path.toString()}&r.`);
+            Logger.debug(Logger.Type.Filesystem, `&c_create&r: Resource already exists for path &c${path.toString()}&r`);
             return callback(Errors.ResourceAlreadyExists);
         }
 
         if (ctx.type.isDirectory) {
-            Logger.info(Logger.Type.Filesystem, `Creating directory &c${path.toString()}&r...`);
+            Logger.info(Logger.Type.Filesystem, `&c_create&r: Creating directory &c${path.toString()}&r...`);
             this.fs.mkdirSync(path.toString(), { recursive: true });
         }
 
         if (ctx.type.isFile) {
-            Logger.info(Logger.Type.Filesystem, `Creating file &c${path.toString()}&r...`);
+            Logger.info(Logger.Type.Filesystem, `&c_create&r: Creating file &c${path.toString()}&r...`);
             this.fs.setFile(path.toString(), this.provider.createVFile(path.fileName(), 0));
         }
 
@@ -200,17 +197,13 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         });
 
         const stat = this.fs.statSync(path.toString());
-        if (!stat.isFile()) {
-            return callback(Errors.ResourceNotFound);
-        }
+        if (!stat.isFile()) return callback(Errors.ResourceNotFound);
 
         const file = this.fs.getFile(path.toString());
-        if (file.chunks.length == 0) {
-            return callback(undefined, Readable.from(Buffer.from([])));
-        }
+        if (file.chunks.length == 0) return callback(undefined, Readable.from(Buffer.from([])));
 
         const readStream = await this.provider.createReadStream(file);
-        Logger.debug(Logger.Type.Filesystem, `Stream opened for path &c${path.toString()}&r`);
+        Logger.debug(Logger.Type.Filesystem, `&c_openReadStream&r: Stream opened for path &c${path.toString()}&r`);
 
         return callback(undefined, readStream);
     }
@@ -229,13 +222,11 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         });
 
         const stat = this.fs.statSync(path.toString());
-        if (!stat.isFile()) {
-            return callback(Errors.InvalidOperation);
-        }
+        if (!stat.isFile()) return callback(Errors.InvalidOperation);
 
         const file = this.fs.getFile(path.toString());
         for (const chunk of file.chunks) {
-            Logger.debug(Logger.Type.Filesystem, `Deleting chunk &c${chunk.id}&r for file &c${file.name}&r...`);
+            Logger.debug(Logger.Type.Filesystem, `&c_openWriteStream&r: Deleting chunk &c${chunk.id}&r for file &c${file.name}&r...`);
 
             this.provider.addToDeletionQueue({
                 channel: this.core.filesChannel.id,
@@ -251,7 +242,7 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
 
         const writeStream = await this.provider.createWriteStream(file, {
             onFinished: async () => {
-                Logger.info(Logger.Type.Filesystem, `Stream finished for path &c${path.toString()}&r`);
+                Logger.info(Logger.Type.Filesystem, `&c_openWriteStream&r: Stream finished for path &c${path.toString()}&r`);
                 this.fs.setFile(path.toString(), file);
                 this.core.markForUpload();
             },
@@ -261,16 +252,14 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
                 this.fs.setFile(path.toString(), file);
             },
             onAbort: (error) => {
-                if (!error) {
-                    return;
-                }
+                if (!error) return;
 
-                Logger.error(Logger.Type.Filesystem, `Stream aborted for path &c${path.toString()}&r due to an error`, error);
+                Logger.error(Logger.Type.Filesystem, `&c_openWriteStream&r: Stream aborted for path &c${path.toString()}&r due to an error`, error);
                 this.fs.rmSync(path.toString(), { recursive: true });
             }
         });
 
-        Logger.debug(Logger.Type.Filesystem, `Stream opened for path &c${path.toString()}&r with estimated size &c${estimatedSize}&r...`);
+        Logger.debug(Logger.Type.Filesystem, `&c_openWriteStream&r: Stream opened for path &c${path.toString()}&r with estimated size &c${estimatedSize}&r...`);
         return callback(undefined, writeStream);
     }
 
@@ -288,17 +277,12 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         const stat = this.fs.statSync(path.toString());
         const filesToDelete = [];
 
-        if (stat.isFile()) {
-            filesToDelete.push(path.toString());
-        }
-
-        if (stat.isDirectory()) {
-            filesToDelete.push(...this.fs.getPathsRecursive(path.toString()));
-        }
+        if (stat.isFile()) filesToDelete.push(path.toString());
+        if (stat.isDirectory()) filesToDelete.push(...this.fs.getPathsRecursive(path.toString()));
 
         for (const fileToDelete of filesToDelete) {
             for (const chunk of this.fs.getFile(fileToDelete).chunks) {
-                Logger.debug(Logger.Type.Filesystem, `Deleting chunk &c${chunk.id}&r for file &c${fileToDelete}&r...`);
+                Logger.debug(Logger.Type.Filesystem, `&c_delete&r: Deleting chunk &c${chunk.id}&r for file &c${fileToDelete}&r...`);
 
                 this.provider.addToDeletionQueue({
                     channel: this.core.filesChannel.id,
@@ -318,41 +302,41 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
      * @param {v2.Path} pathTo
      * @returns {Promise<boolean>} 
      */
-    copyFile = (pathFrom, pathTo) => new Promise(async (resolve, reject) => {
-        Logger.debug(Logger.Type.Filesystem, `&ccopyFile&r`, {
-            pathFrom: pathFrom.toString(), pathTo: pathTo.toString()
+    copyFile(pathFrom, pathTo) {
+        return new Promise(async (resolve, reject) => {
+            Logger.debug(Logger.Type.Filesystem, `&ccopyFile&r`, {
+                pathFrom: pathFrom.toString(), pathTo: pathTo.toString()
+            });
+    
+            if (!this.fs.existsSync(pathFrom.toString()) || pathFrom.toString() == pathTo.toString()) {
+                Logger.debug(Logger.Type.Filesystem, "&ccopyFile&r: Source does not exist or target is the same as source.");
+                return resolve(false);
+            }
+    
+            this.fs.mkdirSync(path.parse(pathTo.toString()).dir, { recursive: true });
+    
+            const oldFile = this.fs.getFile(pathFrom.toString());
+            const newFile = this.provider.createVFile(pathTo.fileName(), oldFile.size);
+    
+            const readStream = await this.provider.createReadStream(oldFile);
+            const writeStream = await this.provider.createWriteStream(newFile, {
+                onFinished: async () => {
+                    this.fs.setFile(pathTo.toString(), newFile);
+                    this.core.markForUpload();
+    
+                    return resolve(true);
+                },
+                onAbort: (error) => {
+                    if (!error) return;
+    
+                    Logger.error(Logger.Type.Filesystem, `&ccopyFile&r: Stream aborted for path &c${pathTo.toString()}&r due to an error.`);
+                    return reject(false);
+                },
+            });
+    
+            readStream.pipe(writeStream);
         });
-
-        if (!this.fs.existsSync(pathFrom.toString()) || pathFrom.toString() == pathTo.toString()) {
-            Logger.debug(Logger.Type.Filesystem, "copyFile - Source does not exist or target is the same as source.");
-            return resolve(false);
-        }
-
-        this.fs.mkdirSync(path.parse(pathTo.toString()).dir, { recursive: true });
-
-        const oldFile = this.fs.getFile(pathFrom.toString());
-        const newFile = this.provider.createVFile(pathTo.fileName(), oldFile.size);
-
-        const readStream = await this.provider.createReadStream(oldFile);
-        const writeStream = await this.provider.createWriteStream(newFile, {
-            onFinished: async () => {
-                this.fs.setFile(pathTo.toString(), newFile);
-                this.core.markForUpload();
-
-                return resolve(true);
-            },
-            onAbort: (error) => {
-                if (!error) {
-                    return;
-                }
-
-                Logger.error(Logger.Type.Filesystem, `Stream aborted for path &c${pathTo.toString()}&r due to an error.`);
-                return reject(false);
-            },
-        });
-
-        readStream.pipe(writeStream);
-    });
+    }
 
     /**
      * @param {v2.Path} pathFrom
@@ -370,29 +354,25 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         const targetExists = this.fs.existsSync(pathTo.toString());
 
         if (!sourceExists || targetExists) {
-            Logger.debug(Logger.Type.Filesystem, "Source does not exist or target already exists.");
+            Logger.debug(Logger.Type.Filesystem, "&c_copy&r: Source does not exist or target already exists.");
             return callback(Errors.Forbidden);
         }
 
         const sourceStat = this.fs.statSync(pathFrom.toString());
-
         if (sourceStat.isDirectory()) {
-            let files = this.fs.getFilesWithPathRecursive(pathFrom.toString());
+            const files = this.fs.getFilesWithPathRecursive(pathFrom.toString());
  
-            for (let oldPath in files) {
-                let newPath = pathTo.toString() + oldPath.substring(pathFrom.toString().length);
+            for (const oldPath in files) {
+                const newPath = pathTo.toString() + oldPath.substring(pathFrom.toString().length);
  
-                if (!await this.copyFile(new v2.Path(oldPath), new v2.Path(newPath))) {
+                if (!await this.copyFile(new v2.Path(oldPath), new v2.Path(newPath))) 
                     return callback(Errors.InvalidOperation);
-                }
             }
         }
 
-        if (sourceStat.isFile()) {
-            if (!await this.copyFile(pathFrom, pathTo)) {
-                return callback(Errors.InvalidOperation);
-            }
-        }
+
+        if (sourceStat.isFile() && !await this.copyFile(pathFrom, pathTo)) 
+            return callback(Errors.InvalidOperation);
 
         return callback(undefined, true);
     }
@@ -413,11 +393,11 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         const targetExists = this.fs.existsSync(pathTo.toString());
 
         if (!sourceExists || targetExists) {
-            Logger.debug(Logger.Type.Filesystem, "Source does not exist or target already exists.");
+            Logger.debug(Logger.Type.Filesystem, "&c_move&r: Source does not exist or target already exists.");
             return callback(Errors.InvalidOperation);
         }
 
-        Logger.info(Logger.Type.Filesystem, `Moved &c${pathFrom.toString()}&r to &c${pathTo.toString()}&r.`);
+        Logger.info(Logger.Type.Filesystem, `&c_move&r: Moved &c${pathFrom.toString()}&r to &c${pathTo.toString()}&r.`);
         this.fs.renameSync(pathFrom.toString(), pathTo.toString());
         this.core.markForUpload();
 
@@ -439,7 +419,7 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         const oldPath = pathFrom.toString();
         const newPath = `${pathFrom.parentName()}/${newName}`;
 
-        Logger.info(Logger.Type.Filesystem, `Renamed &c${oldPath}&r to &c${newPath}&r.`);
+        Logger.info(Logger.Type.Filesystem, `&c_rename&r: Renamed &c${oldPath}&r to &c${newPath}&r.`);
         this.fs.renameSync(oldPath, newPath);
         
         return callback(undefined, true);
@@ -455,9 +435,8 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
             path: path.toString(), ctx: this._getContext(ctx)
         });
 
-        if (this.fs.statSync(path.toString()).isDirectory()) {
+        if (this.fs.statSync(path.toString()).isDirectory()) 
             return callback(undefined, new Date().getTime());
-        }
 
         const file = this.fs.getFile(path.toString());
         return callback(undefined, file.modified.getTime());
@@ -473,9 +452,8 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
             path: path.toString(), ctx: this._getContext(ctx)
         });
 
-        if (this.fs.statSync(path.toString()).isDirectory()) {
+        if (this.fs.statSync(path.toString()).isDirectory()) 
             return callback(undefined, new Date().getTime());
-        }
 
         const file = this.fs.getFile(path.toString());
         return callback(undefined, file.created.getTime());
@@ -494,9 +472,8 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
         });
 
         const stat = this.fs.statSync(path.toString());
-        if (stat.isDirectory()) {
+        if (stat.isDirectory()) 
             return callback(undefined, "0");
-        }
 
         return callback(undefined, this.fs.getFile(path.toString()).modified.getTime().toString());
     }

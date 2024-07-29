@@ -29,9 +29,7 @@ class DiscordFileProvider extends BaseProvider {
      */
     getAttachmentBuilderFromBuffer(buffer, chunkName, chunkNumber = 0) {
         let name = `${chunkName}_${chunkNumber}`;
-        if (Config.encryptionEnabled) {
-            name = `${crypto.randomBytes(16).toString("hex")}.enc`;
-        }
+        if (Config.encryptionEnabled) name = `${crypto.randomBytes(16).toString("hex")}.enc`;
 
         return new AttachmentBuilder(buffer, { name });
     }
@@ -69,7 +67,7 @@ class DiscordFileProvider extends BaseProvider {
     }
 
     /**
-     * @param {import("../file/IFile").IFile} file 
+     * @param {import("../DocTypes").IFile} file 
      * @returns {Promise<import("stream").Readable>} 
      */
     async createRawReadStream(file) {

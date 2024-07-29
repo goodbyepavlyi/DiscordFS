@@ -12,7 +12,7 @@ class Core extends Client {
     constructor() {
         super({
             intents: [
-                IntentsBitField.Flags.Guilds, 
+                IntentsBitField.Flags.Guilds,
                 IntentsBitField.Flags.GuildMessages
             ],
             rest: { timeout: 60_000 }
