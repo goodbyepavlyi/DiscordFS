@@ -3,12 +3,21 @@ const Config = require("../Config");
 
 module.exports = class Encryption {
     static _encryptionMethod = "aes-256-cbc";
+    /** @private */
+    static _key = null;
+    /** @private */
+    static _iv = null;
+    /** @private */
+    static _cipher = null;
+    /** @private */
+    static _decipher = null;
 
     static get key() {
         if (this._key) return this._key;
         if (!Config.encryptionEnabled) return null;
 
         this._key = crypto.createHash("sha512").update(Config.encryptionKey).digest("hex").substring(0, 32);
+        return this._key;
     }
 
     static get iv() {
@@ -16,20 +25,23 @@ module.exports = class Encryption {
         if (!Config.encryptionEnabled) return null;
 
         this._iv = crypto.createHash("sha512").update(Config.encryptionIV).digest("hex").substring(0, 16);
+        return this._iv;
     }
 
     static get cipher() {
         if (this._cipher) return this._cipher;
         if (!this.key || !this.iv) return null;
 
-        return crypto.createCipheriv(this._encryptionMethod, this.key, this.iv);
+        this._cipher = crypto.createCipheriv(this._encryptionMethod, this.key, this.iv);
+        return this._cipher;
     }
 
     static get decipher() {
         if (this._decipher) return this._decipher;
         if (!this.key || !this.iv) return null;
 
-        return crypto.createDecipheriv(this._encryptionMethod, this.key, this.iv);
+        this._decipher = crypto.createDecipheriv(this._encryptionMethod, this.key, this.iv);
+        return this._decipher;
     }
 
     static encrypt(data) {
