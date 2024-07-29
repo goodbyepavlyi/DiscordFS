@@ -7,7 +7,7 @@ const BaseProvider = require("./BaseProvider");
 const HttpStreamPool = require("../utils/HttpStreamPool");
 const Config = require("../Config");
 
-const MAX_REAL_CHUNK_SIZE = 25 * 1000 * 1000; // Looks like 25 mb is a new discord limit from 13.04.23 instead of old 8 MB. 
+const MaxRealChunkSize = 25 * 1000 * 1000; // Looks like 25 mb is a new discord limit from 13.04.23 instead of old 8 MB. 
 
 class DiscordFileProvider extends BaseProvider {
     /**
@@ -80,17 +80,16 @@ class DiscordFileProvider extends BaseProvider {
      * @returns {Promise<Writable>}
      */
     async createRawWriteStream(file, callbacks) {
-        const channel = this.core.filesChannel;
-        const totalChunks = Math.ceil(file.estimatedSize / MAX_REAL_CHUNK_SIZE);
-        const buffer = new MutableBuffer(MAX_REAL_CHUNK_SIZE);
+        const totalChunks = Math.ceil(file.estimatedSize / MaxRealChunkSize);
+        const buffer = new MutableBuffer(MaxRealChunkSize);
         let chunkId = 1;
 
         Logger.debug(Logger.Type.FileProvider, `Total chunks: &c${totalChunks}&r - file.estimatedSize: &c${file.estimatedSize}&r - file.size: &c${file.size}&r - file.name: &c${file.name}&r`);
 
         return new Writable({
             write: async (chunk, encoding, callback) => {
-                if (buffer.size + chunk.length > MAX_REAL_CHUNK_SIZE) {
-                    await this.uploadChunkToDiscord(buffer, chunkId, totalChunks, channel, file);
+                if (buffer.size + chunk.length > MaxRealChunkSize) {
+                    await this.uploadChunkToDiscord(buffer, chunkId, totalChunks, this.core._filesChannel, file);
                     
                     Logger.debug(Logger.Type.FileProvider, `Chunk &c${chunkId}&r of &c${totalChunks}&r chunks uploaded, clearing buffer...`);
                     chunkId++;
@@ -108,7 +107,7 @@ class DiscordFileProvider extends BaseProvider {
             },
             final: async (callback) => {
                 if (buffer.size > 0) {
-                    await this.uploadChunkToDiscord(buffer, chunkId, totalChunks, channel, file);
+                    await this.uploadChunkToDiscord(buffer, chunkId, totalChunks, this.core._filesChannel, file);
                 }
 
                 if (callbacks.onFinished) {
@@ -158,5 +157,5 @@ class DiscordFileProvider extends BaseProvider {
 
 module.exports = {
     DiscordFileProvider,
-    MAX_REAL_CHUNK_SIZE
+    MaxRealChunkSize
 }

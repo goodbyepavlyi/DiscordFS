@@ -364,7 +364,6 @@ module.exports = class DiscordFilesystem extends v2.FileSystem {
             }
         }
 
-
         if (sourceStat.isFile() && !await this.copyFile(pathFrom, pathTo)) 
             return callback(Errors.InvalidOperation);
 
