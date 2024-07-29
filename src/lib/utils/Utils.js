@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-class Tools {
+class Utils {
     static readDirectoryRecursively(directory) {
         const files = [];
 
@@ -9,7 +9,7 @@ class Tools {
             const stat = fs.statSync(path.join(directory, file));
     
             if (stat.isFile()) return files.push(path.join(directory, file));
-            if (stat.isDirectory()) Tools.readDirectoryRecursively(path.join(directory, file)).forEach(walkItem => files.push(walkItem));
+            if (stat.isDirectory()) Utils.readDirectoryRecursively(path.join(directory, file)).forEach(walkItem => files.push(walkItem));
         });
     
         return files;
@@ -35,4 +35,4 @@ class Tools {
     static truncate = (str, n, includeDots = false) => ((str.length > n) ? str.substring(0, n - 1) : str) + (includeDots && str.length > n ? '...' : '')
 }
 
-module.exports = Tools;
+module.exports = Utils;

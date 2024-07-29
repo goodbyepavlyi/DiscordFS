@@ -4,7 +4,7 @@ const webdav = require("webdav-server").v2;
 const Logger = require("../Logger");
 const DiscordFilesystem = require("../storage/DiscordFilesystem");
 const Config = require("../Config");
-const Tools = require("../utils/Tools");
+const Utils = require("../utils/Utils");
 
 module.exports = class WebDAVServer {
     /**
@@ -35,8 +35,8 @@ module.exports = class WebDAVServer {
             }
 
             this.serverOptions.https = {
-                key: Tools.readFileSyncOrUndefined(path.resolve(__dirname, "../../data/certs/privkey.pem")),
-                cert: Tools.readFileSyncOrUndefined(path.resolve(__dirname, "../../data/certs/cert.pem"))
+                key: Utils.readFileSyncOrUndefined(path.resolve(__dirname, "../../data/certs/privkey.pem")),
+                cert: Utils.readFileSyncOrUndefined(path.resolve(__dirname, "../../data/certs/cert.pem"))
             }
         }
 
