@@ -13,16 +13,6 @@ module.exports = class Encryption {
      * @type {string}
      */
     static _iv = null;
-    /**
-     * @private
-     * @type {crypto.Cipher}
-     */
-    static _cipher = null;
-    /**
-     * @private
-     * @type {crypto.Decipher}
-     */
-    static _decipher = null;
 
     static get key() {
         if (this._key) return this._key;
@@ -40,27 +30,25 @@ module.exports = class Encryption {
         return this._iv;
     }
 
-    static get cipher() {
-        if (this._cipher) return this._cipher;
+    static createCipher() {
         if (!this.key || !this.iv) return null;
 
-        this._cipher = crypto.createCipheriv(this._encryptionMethod, this.key, this.iv);
-        return this._cipher;
+        return crypto.createCipheriv(this._encryptionMethod, this.key, this.iv);
     }
 
-    static get decipher() {
-        if (this._decipher) return this._decipher;
+    static createDecipher() {
         if (!this.key || !this.iv) return null;
 
-        this._decipher = crypto.createDecipheriv(this._encryptionMethod, this.key, this.iv);
-        return this._decipher;
+        return crypto.createDecipheriv(this._encryptionMethod, this.key, this.iv);
     }
 
     static encrypt(data) {
-        return this.cipher.update(data, "utf8", "hex") + this.cipher.final("hex");
+        const cipher = this.createCipher();
+        return cipher.update(data, "utf8", "hex") + cipher.final("hex");
     }
 
     static decrypt(data) {
-        return this.decipher.update(data, "hex", "utf8") + this.decipher.final("utf8");
+        const decipher = this.createDecipher();
+        return decipher.update(data, "hex", "utf8") + decipher.final("utf8");
     }
 }
