@@ -12,10 +12,9 @@ module.exports = class WebDAVServer {
      */
     constructor(core) {
         this.core = core;
-        this.port = Config.webserverPort
 
         this.serverOptions = {
-            port: this.port,
+            port: Config.webserverPort,
             rootFileSystem: new DiscordFilesystem(this.core)
         };
 
@@ -44,18 +43,17 @@ module.exports = class WebDAVServer {
             Logger.info(Logger.Type.WebDAV, "Enabling authentication..");
 
             this.userManager = new webdav.SimpleUserManager();
-            for (const user of Config.webserverUsers) {
+            for (const user of Config.webserverUsers) 
                 this.userManager.addUser(user.username, user.password);
-            }
             
             this.serverOptions.requireAuthentification = true;
-            this.serverOptions.httpAuthentication = new webdav.HTTPBasicAuthentication(this.userManager, "Default realm");
+            this.serverOptions.httpAuthentication = new webdav.HTTPBasicAuthentication(this.userManager);
         }
 
         this.server = new webdav.WebDAVServer(this.serverOptions);
     }
 
-    async start() {
-        this.server.start(() => Logger.info(Logger.Type.WebDAV, `WebDAV server started on port ${this.port}`));
+    start() {
+        this.server.start(() => Logger.info(Logger.Type.WebDAV, `WebDAV server started on port ${this.serverOptions.port}`));
     }
 }
