@@ -6,7 +6,7 @@
     "axios": "^1.7.4",
     "axios-retry": "^4.0.0",
     "discord.js": "^14.15.3",
-    "express": "^4.19.2",
+    "express": "^4.21.0",
     "memfs": "^4.7.7",
     "mime-types": "^2.1.35",
     "mutable-buffer": "^4.0.2",
